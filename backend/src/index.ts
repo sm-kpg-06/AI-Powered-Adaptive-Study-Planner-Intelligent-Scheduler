@@ -1,3 +1,4 @@
+import path from 'path';
 import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth';
@@ -29,6 +30,13 @@ app.use('/api/feedback', feedbackRoutes);
 
 app.get('/', (req, res) => {
   res.send('AI Study Planner API is running');
+});
+
+const frontendDistPath = path.join(__dirname, '../../frontend/dist');
+app.use(express.static(frontendDistPath));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendDistPath, 'index.html'));
 });
 
 export const server = app.listen(PORT as number, '0.0.0.0', () => {

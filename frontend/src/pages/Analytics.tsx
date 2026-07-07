@@ -1,10 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Trophy, Target, Flame, Zap, Clock } from 'lucide-react';
 import api from '../api/client';
-import confetti from 'canvas-confetti';
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
+
+const triggerConfetti = () => {
+  void import('canvas-confetti').then((m) => {
+    m.default({ particleCount: 50, gravity: 0.8, spread: 90, origin: { y: 0.1 } });
+  });
+};
 
 export default function Analytics() {
   const [tasks, setTasks] = useState<any[]>([]);
@@ -13,7 +18,7 @@ export default function Analytics() {
     api.get('/schedule').then(res => {
         setTasks(res.data);
         if (res.data.filter((t: any) => t.isCompleted).length > 0) {
-            confetti({ particleCount: 50, gravity: 0.8, spread: 90, origin: { y: 0.1 } });
+            triggerConfetti();
         }
     }).catch(console.error);
   }, []);
@@ -114,7 +119,7 @@ export default function Analytics() {
                    <ResponsiveContainer width="100%" height="100%">
                      <PieChart>
                        <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
-                         {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                         {pieData.map((_, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                        </Pie>
                        <Tooltip contentStyle={{ backgroundColor: '#111827', borderColor: '#374151' }} itemStyle={{ color: '#fff' }}/>
                      </PieChart>

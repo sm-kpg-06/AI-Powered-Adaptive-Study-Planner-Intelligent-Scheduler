@@ -1,8 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Play, Pause, CheckCircle2, ArrowLeft, BrainCircuit } from 'lucide-react';
 import api from '../api/client';
-import confetti from 'canvas-confetti';
+
+const triggerConfetti = () => {
+  void import('canvas-confetti').then((m) => {
+    m.default({ particleCount: 200, spread: 100, gravity: 1.2, origin: { y: 0.5 }, colors: ['#3B82F6', '#10B981', '#F59E0B'] });
+  });
+};
 
 export default function FocusRoom() {
   const { taskId } = useParams();
@@ -35,7 +40,7 @@ export default function FocusRoom() {
   const handleComplete = async () => {
     try {
       await api.post(`/tasks/${taskId}/complete`, { completionPercentage: 100 });
-      confetti({ particleCount: 200, spread: 100, gravity: 1.2, origin: { y: 0.5 }, colors: ['#3B82F6', '#10B981', '#F59E0B'] });
+      triggerConfetti();
       setTimeout(() => navigate('/app'), 2500);
     } catch (e) { console.error(e); }
   };
