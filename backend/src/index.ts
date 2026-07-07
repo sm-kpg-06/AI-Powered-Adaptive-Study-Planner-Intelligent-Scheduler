@@ -29,11 +29,20 @@ app.use('/api/tasks', tasksRoutes);
 app.use('/api/feedback', feedbackRoutes);
 
 const frontendDistPath = path.join(__dirname, '../../frontend/dist');
+console.log(`Frontend dist path: ${frontendDistPath}`);
+
 app.use(express.static(frontendDistPath));
 
 // Serve index.html for all unmatched routes (SPA routing)
 app.get(/.*/, (req, res) => {
-  res.sendFile(path.join(frontendDistPath, 'index.html'));
+  const indexPath = path.join(frontendDistPath, 'index.html');
+  console.log(`Serving SPA for ${req.path}, sending: ${indexPath}`);
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      console.error(`Error serving index.html: ${err.message}`);
+      res.status(404).send('index.html not found');
+    }
+  });
 });
 
 export const server = app.listen(PORT as number, '0.0.0.0', () => {

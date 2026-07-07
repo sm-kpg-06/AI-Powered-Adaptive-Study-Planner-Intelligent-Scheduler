@@ -30,10 +30,18 @@ app.use('/api/calendar', calendar_1.default);
 app.use('/api/tasks', tasks_1.default);
 app.use('/api/feedback', feedback_1.default);
 const frontendDistPath = path_1.default.join(__dirname, '../../frontend/dist');
+console.log(`Frontend dist path: ${frontendDistPath}`);
 app.use(express_1.default.static(frontendDistPath));
 // Serve index.html for all unmatched routes (SPA routing)
 app.get(/.*/, (req, res) => {
-    res.sendFile(path_1.default.join(frontendDistPath, 'index.html'));
+    const indexPath = path_1.default.join(frontendDistPath, 'index.html');
+    console.log(`Serving SPA for ${req.path}, sending: ${indexPath}`);
+    res.sendFile(indexPath, (err) => {
+        if (err) {
+            console.error(`Error serving index.html: ${err.message}`);
+            res.status(404).send('index.html not found');
+        }
+    });
 });
 exports.server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running natively on 0.0.0.0:${PORT}`);
