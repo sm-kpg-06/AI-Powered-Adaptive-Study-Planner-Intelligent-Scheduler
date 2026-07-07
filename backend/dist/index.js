@@ -29,12 +29,10 @@ app.use('/api/schedule', schedule_1.default);
 app.use('/api/calendar', calendar_1.default);
 app.use('/api/tasks', tasks_1.default);
 app.use('/api/feedback', feedback_1.default);
-app.get('/', (req, res) => {
-    res.send('AI Study Planner API is running');
-});
 const frontendDistPath = path_1.default.join(__dirname, '../../frontend/dist');
 app.use(express_1.default.static(frontendDistPath));
-app.get('*', (req, res) => {
+// Serve index.html for all unmatched routes (SPA routing)
+app.get(/.*/, (req, res) => {
     res.sendFile(path_1.default.join(frontendDistPath, 'index.html'));
 });
 exports.server = app.listen(PORT, '0.0.0.0', () => {
