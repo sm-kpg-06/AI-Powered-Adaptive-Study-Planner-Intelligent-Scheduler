@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id                  String   @id @default(uuid())
+  email               String   @unique
+  password            String
+  name                String
+  age                 Int?
+  profession          String?  
+  onboardingCompleted Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  subjects            Subject[]
+  tasks               Task[]
+  routine             Routine?
+  calendarEvents      CalendarEvent[]
+  dailyLogs           DailyLog[]
+  dailySchedules      DailySchedule[]
+  exams               Exam[]
+}
+
+model Routine {
+  id                String   @id @default(uuid())
+  wakeTime          String   @default("07:00")
+  sleepTime         String   @default("23:00")
+  isWeekendDifferent Boolean @default(false)
+  weekendWakeTime   String?
+  weekendSleepTime  String?
+  breakfastTime     String?
+  lunchTime         String?
+  dinnerTime        String?
+  timetable         String?  // JSON string: { "Monday": [{start, end}], ... }
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model DailySchedule {
+  id          String   @id @default(uuid())
+  date        DateTime
+  wakeTime    String
+  sleepTime   String
+  busySlots   String   // JSON string array of { title, startTime, endTime }
+  freeSlots   String   // JSON string array of { startTime, endTime }
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks       Task[]
+  
+  @@unique([userId, date])
+}
+
+model Subject {
+  id        String   @id @default(uuid())
+  name      String
+  color     String   @default("#3B82F6")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topics    Topic[]
+  tasks     Task[]
+  exams     Exam[]
+}
+
+// NEW: Exam model — each subject can have many exams
+model Exam {
+  id        String   @id @default(uuid())
+  examName  String   // e.g. "Midterm 1", "Quiz 2", "Final"
+  examDate  DateTime
+  createdAt DateTime @default(now())
+  
+  subjectId String
+  subject   Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topics    Topic[]
+  tasks     Task[]
+}
+
+model Topic {
+  id          String   @id @default(uuid())
+  title       String
+  difficulty  String   @default("Medium")
+  estimatedHours Float  @default(1.5)   // hours (replaces duration in mins)
+  isCompleted Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  subjectId   String
+  subject     Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  examId      String?  // FK to the specific exam this topic belongs to
+  exam        Exam?    @relation(fields: [examId], references: [id], onDelete: SetNull)
+  tasks       Task[]
+}
+
+model Task {
+  id           String   @id @default(uuid())
+  taskType     String   @default("ASSIGNMENT") 
+  title        String
+  date         DateTime? // Scheduled base date
+  startTime    String?   // "HH:MM"
+  endTime      String?   // "HH:MM"
+  duration     Int?      // in minutes
+  difficulty   String?  
+  focusType    String?   // "Deep Focus" | "Active Recall" | "Light Focus"
+  deadline     DateTime?
+  examDate     DateTime?
+  examName     String?   // e.g. "Midterm 1"
+  priority     String   @default("Medium") 
+  isCompleted  Boolean  @default(false)
+  isMissed     Boolean  @default(false)
+  isSubTask    Boolean  @default(false)  // true for auto-generated split-part children
+  completionPercentage Int @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subjectId    String?
+  subject      Subject? @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  topicId      String?
+  topic        Topic?   @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  examId       String?
+  exam         Exam?    @relation(fields: [examId], references: [id], onDelete: SetNull)
+  
+  dailyScheduleId String?
+  dailySchedule   DailySchedule? @relation(fields: [dailyScheduleId], references: [id], onDelete: SetNull)
+}
+
+model CalendarEvent {
+  id          String   @id @default(uuid())
+  title       String
+  type        String   // HOLIDAY, BUSY, TIMETABLE
+  date        DateTime
+  startTime   String?  
+  endTime     String?
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model DailyLog {
+  id          String   @id @default(uuid())
+  date        DateTime
+  reported    Boolean  @default(false)
+  feedbackData String?
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, date])
+}
