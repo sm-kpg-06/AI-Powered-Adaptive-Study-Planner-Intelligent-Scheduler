@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { BookOpen, Target, Clock, AlertTriangle, Plus, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { BookOpen, Target, AlertTriangle, Plus } from 'lucide-react';
 import api from '../api/client';
 
 export default function Tasks() {

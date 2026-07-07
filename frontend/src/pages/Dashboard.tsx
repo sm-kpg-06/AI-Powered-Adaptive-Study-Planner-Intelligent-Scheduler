@@ -29,8 +29,10 @@ function FocusBadge({ type }: { type: string }) {
 export default function Dashboard() {
   const { user } = useAuth();
   const [tasks, setTasks] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
+
+
+
 
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [yesterdayTasks, setYesterdayTasks] = useState<any[]>([]);
@@ -38,9 +40,9 @@ export default function Dashboard() {
   const [taskCompletionMap, setTaskCompletionMap] = useState<Record<string, number>>({});
 
   const fetchData = async () => {
-    setLoading(true);
     try {
       const scheduleRes = await api.get('/schedule');
+
       setTasks(scheduleRes.data);
 
       const feedbackRes = await api.get('/feedback/today');
@@ -55,8 +57,8 @@ export default function Dashboard() {
     } catch (e) {
       console.error(e);
     } finally {
-      setLoading(false);
     }
+
   };
 
   useEffect(() => { fetchData(); }, []);
