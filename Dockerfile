@@ -1,5 +1,5 @@
 # Build stage
-FROM node:18-slim AS builder
+FROM node:22-slim AS builder
 WORKDIR /app
 
 # Install python and other build tools for compilation (e.g. bcrypt, sqlite3)
@@ -18,7 +18,7 @@ COPY backend/ ./backend/
 RUN cd backend && npx prisma generate && npm run build
 
 # Final runner stage
-FROM node:18-slim
+FROM node:22-slim
 WORKDIR /app
 
 # Install Python 3 (required for the AI scheduler engine)
