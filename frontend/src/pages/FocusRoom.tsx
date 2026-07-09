@@ -21,7 +21,7 @@ export default function FocusRoom() {
        const t = res.data.find((x: any) => x.id === taskId);
        if (t) {
           setTask(t);
-          setTimeLeft(t.duration * 60); // minutes to seconds
+          setTimeLeft((t.scheduledMinutes || t.duration || 0) * 60); // minutes to seconds
        }
     });
   }, [taskId]);
@@ -41,19 +41,22 @@ export default function FocusRoom() {
     try {
       await api.post(`/tasks/${taskId}/complete`, { completionPercentage: 100 });
       triggerConfetti();
-      setTimeout(() => navigate('/app'), 2500);
+      setTimeout(() => navigate('/'), 2500);
     } catch (e) { console.error(e); }
   };
 
   if (!task) return <div className="min-h-screen bg-gray-950 flex items-center justify-center"><BrainCircuit className="w-12 h-12 animate-pulse text-indigo-500" /></div>;
 
-  const mins = Math.floor(timeLeft / 60);
+  const hrs = Math.floor(timeLeft / 3600);
+  const mins = Math.floor((timeLeft % 3600) / 60);
   const secs = timeLeft % 60;
-  const progress = ((task.duration * 60 - timeLeft) / (task.duration * 60)) * 100;
+  const taskDuration = task.scheduledMinutes || task.duration || 0;
+  const progress = ((taskDuration * 60 - timeLeft) / (taskDuration * 60)) * 100;
+  const showHours = taskDuration >= 60;
 
   return (
     <div className="fixed inset-0 bg-gray-950 z-50 flex flex-col items-center justify-center p-4 animate-in fade-in duration-700">
-       <button onClick={() => navigate('/app')} className="absolute top-8 left-8 text-gray-400 hover:text-white flex items-center gap-2 transition-colors"><ArrowLeft className="w-5 h-5"/> Exit Focus</button>
+       <button onClick={() => navigate('/')} className="absolute top-8 left-8 text-gray-400 hover:text-white flex items-center gap-2 transition-colors"><ArrowLeft className="w-5 h-5"/> Exit Focus</button>
        
        <div className="text-center max-w-2xl w-full">
           <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">{task.title}</h1>
@@ -66,7 +69,7 @@ export default function FocusRoom() {
              </svg>
              <div className="absolute flex flex-col items-center justify-center">
                 <div className="text-7xl font-black text-white tabular-nums tracking-tighter drop-shadow-md">
-                   {String(mins).padStart(2, '0')}:{String(secs).padStart(2, '0')}
+                   {showHours && `${String(hrs).padStart(2, '0')}:`}{String(mins).padStart(2, '0')}:{String(secs).padStart(2, '0')}
                 </div>
                 <div className="text-indigo-200 mt-2 font-medium">REMAINING</div>
              </div>

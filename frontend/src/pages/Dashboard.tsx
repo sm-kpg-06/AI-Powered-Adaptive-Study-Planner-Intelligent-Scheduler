@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { CheckCircle, AlertTriangle, Send, Activity, Sun, Moon, BrainCircuit, Coffee, Zap, BookOpen, Flame } from 'lucide-react';
 import api from '../api/client';
@@ -28,6 +29,7 @@ function FocusBadge({ type }: { type: string }) {
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState<any[]>([]);
   const [generating, setGenerating] = useState(false);
 
@@ -268,7 +270,7 @@ export default function Dashboard() {
                           {/* Actions */}
                           {!task.isCompleted && (
                             <div className="flex gap-2 shrink-0">
-                              <button onClick={() => window.open(`/app/focus/${task.id}`, '_self')} className="p-2 bg-gray-800 border border-gray-700 hover:bg-indigo-900 text-indigo-400 rounded-lg transition flex items-center gap-1 text-xs font-bold px-3">
+                              <button onClick={() => navigate(`/focus/${task.id}`)} className="p-2 bg-gray-800 border border-gray-700 hover:bg-indigo-900 text-indigo-400 rounded-lg transition flex items-center gap-1 text-xs font-bold px-3">
                                 <BrainCircuit size={15} /> Focus
                               </button>
                               <button onClick={() => handleComplete(task.id)} className="p-2 bg-emerald-600/20 hover:bg-emerald-500/40 text-emerald-400 border border-emerald-500/20 rounded-lg transition" title="Mark complete">
